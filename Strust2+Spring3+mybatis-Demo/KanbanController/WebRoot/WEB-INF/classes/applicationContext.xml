@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	http://www.springframework.org/schema/aop 
+	http://www.springframework.org/schema/aop/spring-aop-3.2.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+	">
+
+	<bean id="placeholderConfig"    
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">    
+        <property name="location">    
+            <value>classpath:jdbc.properties</value>    
+        </property>    
+    </bean>    
+    
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${kanban.url}" />
+        <property name="driverClass" value="${kanban.driver}" />
+        <property name="user" value="${kanban.username}" />
+        <property name="password" value="${kanban.password}" />    
+        <property name="acquireIncrement" value="${kanban.acquireIncrement}" />
+        <property name="initialPoolSize" value="${kanban.initialPoolSize}" />
+        <property name="minPoolSize" value="${kanban.minPoolSize}" />
+        <property name="maxPoolSize" value="${kanban.maxPoolSize}" />
+        <property name="maxStatements" value="${kanban.maxStatements}" />
+        <property name="numHelperThreads" value="${kanban.numHelperThreads}" />
+        <property name="maxIdleTime" value="${kanban.maxIdleTime}" />
+    </bean>    
+    
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">    
+        <property name="configLocation" value="classpath:sqlMapConfig.xml" />    
+        <property name="dataSource" ref="dataSource" />    
+    </bean>    
+    
+    <bean id="abstractDao" abstract="true">    
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />    
+    </bean> 
+    
+    <bean id="userDao" class="com.huawei.kanbancontroller.dao.impl.UserDaoImpl" parent="abstractDao"/>
+    <bean id="userService" class="com.huawei.kanbancontroller.service.impl.UserServiceImpl">
+    	<property name="userDao" ref="userDao" />
+    </bean>
+    
+    <bean id="loginAction" class="com.huawei.kanbancontroller.action.LoginAction">
+		<property name="userService" ref="userService" />
+	</bean>
+	
+</beans>
